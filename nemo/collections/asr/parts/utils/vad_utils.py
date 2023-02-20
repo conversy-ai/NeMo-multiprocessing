@@ -14,7 +14,8 @@
 import glob
 import json
 import math
-import multiprocessing
+#import multiprocessing
+from ray.util.multiprocessing import Pool
 import os
 import shutil
 from itertools import repeat
@@ -80,7 +81,7 @@ def prepare_manifest(config: dict) -> str:
     }
 
     if config.get('num_workers') is not None and config['num_workers'] > 1:
-        with multiprocessing.Pool(processes=config['num_workers']) as p:
+        with Pool(processes=config['num_workers']) as p:
             inputs = zip(input_list, repeat(args_func))
             results = list(
                 tqdm(
@@ -275,7 +276,7 @@ def generate_overlap_vad_seq(
         "smoothing_method": smoothing_method,
     }
     if num_workers is not None and num_workers > 1:
-        with multiprocessing.Pool(processes=num_workers) as p:
+        with Pool(processes=num_workers) as p:
             inputs = zip(frame_filepathlist, repeat(per_args))
             results = list(
                 tqdm(
@@ -730,7 +731,7 @@ def generate_vad_segment_table(
     per_args = {**per_args, **postprocessing_params}
     num_workers = None
     if num_workers is not None and num_workers > 1:
-        with multiprocessing.Pool(num_workers) as p:
+        with Pool(num_workers) as p:
             inputs = zip(vad_pred_filepath_list, repeat(per_args))
             list(
                 tqdm(
